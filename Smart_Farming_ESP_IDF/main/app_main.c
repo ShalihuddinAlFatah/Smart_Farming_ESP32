@@ -2,27 +2,13 @@
 #include "freertos/task.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
-// #include "esp_sleep.h"
 
 #include "sensor_interface_task.h"
 #include "network_connection.h"
 #include "My_MQTT_task.h"
 
-// #define SLEEP_TIME 10  // Sleep duration in seconds
 
 static const char TAG[] = "main";
-// static const char TAG3[] = "sleep";
-
-// void sleep_task(void *pvParameters) {
-//     while (1) 
-//     {
-//         vTaskDelay(pdMS_TO_TICKS(SLEEP_TIME * 1000));  // Wait for SLEEP_TIME seconds
-
-//         ESP_LOGI(TAG3, "Entering deep sleep for %d seconds...", SLEEP_TIME);
-//         esp_sleep_enable_timer_wakeup(SLEEP_TIME * 1000000ULL);
-//         esp_deep_sleep_start();
-//     }
-// }
 
 void network_connected_events(void)
 {
