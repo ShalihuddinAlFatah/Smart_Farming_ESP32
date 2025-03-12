@@ -1,0 +1,288 @@
+[
+    {
+        "id": "a6a4932ebdb71e34",
+        "type": "tab",
+        "label": "MQTTTest",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "bfdb12bd0c03ac87",
+        "type": "mqtt in",
+        "z": "a6a4932ebdb71e34",
+        "name": "ESPValues",
+        "topic": "ESPValues",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "9ccee11644db4956",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 240,
+        "y": 100,
+        "wires": [
+            [
+                "5148e2c72c08b7aa"
+            ]
+        ]
+    },
+    {
+        "id": "5148e2c72c08b7aa",
+        "type": "debug",
+        "z": "a6a4932ebdb71e34",
+        "name": "debug 2",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 660,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "a6684615f87ef50a",
+        "type": "mqtt out",
+        "z": "a6a4932ebdb71e34",
+        "name": "ledState",
+        "topic": "ledState",
+        "qos": "0",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "9ccee11644db4956",
+        "x": 660,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "901bf75a17dcc6ec",
+        "type": "inject",
+        "z": "a6a4932ebdb71e34",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "on",
+        "payloadType": "str",
+        "x": 250,
+        "y": 180,
+        "wires": [
+            [
+                "a6684615f87ef50a"
+            ]
+        ]
+    },
+    {
+        "id": "7ebb8d5118d028a1",
+        "type": "inject",
+        "z": "a6a4932ebdb71e34",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "off",
+        "payloadType": "str",
+        "x": 250,
+        "y": 240,
+        "wires": [
+            [
+                "a6684615f87ef50a"
+            ]
+        ]
+    },
+    {
+        "id": "c34fa71f9872c17b",
+        "type": "mqtt in",
+        "z": "a6a4932ebdb71e34",
+        "name": "Smart Farming",
+        "topic": "/smartfarming",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "9ccee11644db4956",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 260,
+        "y": 320,
+        "wires": [
+            [
+                "8697dc06c9d1615b",
+                "9d176b77635e6572"
+            ]
+        ]
+    },
+    {
+        "id": "9d176b77635e6572",
+        "type": "debug",
+        "z": "a6a4932ebdb71e34",
+        "name": "Smart Farming Output",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 700,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "8697dc06c9d1615b",
+        "type": "json",
+        "z": "a6a4932ebdb71e34",
+        "name": "JSON Parser",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 510,
+        "y": 380,
+        "wires": [
+            [
+                "eb8818c54b229ec3"
+            ]
+        ]
+    },
+    {
+        "id": "eb8818c54b229ec3",
+        "type": "function",
+        "z": "a6a4932ebdb71e34",
+        "name": "function 1",
+        "func": "let temperature = msg.payload.temperature;\nlet humidity = msg.payload.humidity;\nlet timestmp = Math.floor(new Date().getTime()/1000);\n\nmsg.query = \"INSERT INTO smart_farming (time, temperature, humidity) VALUES (\"+timestmp+\", \"+temperature+\", \"+humidity+\");\";\nmsg.payload = [timestmp, temperature, humidity];\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 720,
+        "y": 380,
+        "wires": [
+            [
+                "fca18b7125ca602d",
+                "cefffcd77f511c19"
+            ]
+        ]
+    },
+    {
+        "id": "fca18b7125ca602d",
+        "type": "postgresql",
+        "z": "a6a4932ebdb71e34",
+        "name": "PostgreSQL",
+        "query": "",
+        "postgreSQLConfig": "ed2f35d17e536dd4",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 930,
+        "y": 380,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "cefffcd77f511c19",
+        "type": "debug",
+        "z": "a6a4932ebdb71e34",
+        "name": "debug 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 920,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "9ccee11644db4956",
+        "type": "mqtt-broker",
+        "name": "RasPiMQTT",
+        "broker": "192.168.0.248",
+        "port": 1883,
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "ed2f35d17e536dd4",
+        "type": "postgreSQLConfig",
+        "name": "",
+        "host": "192.168.0.248",
+        "hostFieldType": "str",
+        "port": 5432,
+        "portFieldType": "num",
+        "database": "udemy_course",
+        "databaseFieldType": "str",
+        "ssl": "false",
+        "sslFieldType": "bool",
+        "applicationName": "",
+        "applicationNameType": "str",
+        "max": 10,
+        "maxFieldType": "num",
+        "idle": 1000,
+        "idleFieldType": "num",
+        "connectionTimeout": 10000,
+        "connectionTimeoutFieldType": "num",
+        "user": "My_PostgreSQL_Username",
+        "userFieldType": "str",
+        "password": "My_PostgreSQL_Password",
+        "passwordFieldType": "str"
+    }
+]
