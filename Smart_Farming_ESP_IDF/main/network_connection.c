@@ -23,8 +23,8 @@ static esp_event_handler_instance_t wifi_event_handler;
 
 static EventGroupHandle_t s_wifi_event_group = NULL;
 
-/*
- * IP events callback
+/** 
+ * @brief IP events callback
  * @param arg data, aside from event data, that is passed to the handler when it is called
  * @param event_base the base id of the event to register the handler for
  * @param event_id the id fo the event to register the handler for
@@ -61,8 +61,8 @@ static void ip_event_cb(void *arg, esp_event_base_t event_base, int32_t event_id
     }
 }
 
-/*
- * WiFi events callback
+/**
+ * @brief WiFi events callback
  * @param arg data, aside from event data, that is passed to the handler when it is called
  * @param event_base the base id of the event to register the handler for
  * @param event_id the id fo the event to register the handler for
@@ -122,8 +122,8 @@ static void wifi_event_cb(void *arg, esp_event_base_t event_base, int32_t event_
     }
 }
 
-/*
- * Initialize network connection settings before connecting to network
+/**
+ * @brief Initialize network connection settings before connecting to network
  * @return ESP_OK or ESP_FAIL
  */
 esp_err_t network_init(void)
@@ -131,25 +131,29 @@ esp_err_t network_init(void)
     s_wifi_event_group = xEventGroupCreate();
 
     esp_err_t ret = esp_netif_init();
-    if (ret != ESP_OK) {
+    if (ret != ESP_OK) 
+    {
         ESP_LOGE(TAG, "Failed to initialize TCP/IP network stack");
         return ret;
     }
 
     ret = esp_event_loop_create_default();
-    if (ret != ESP_OK) {
+    if (ret != ESP_OK) 
+    {
         ESP_LOGE(TAG, "Failed to create default event loop");
         return ret;
     }
 
     ret = esp_wifi_set_default_wifi_sta_handlers();
-    if (ret != ESP_OK) {
+    if (ret != ESP_OK) 
+    {
         ESP_LOGE(TAG, "Failed to set default handlers");
         return ret;
     }
 
     mynetwork_netif = esp_netif_create_default_wifi_sta();
-    if (mynetwork_netif == NULL) {
+    if (mynetwork_netif == NULL) 
+    {
         ESP_LOGE(TAG, "Failed to create default WiFi STA interface");
         return ESP_FAIL;
     }
@@ -171,8 +175,10 @@ esp_err_t network_init(void)
     return ret;
 }
 
-/*
- * Connecting to network and set appropriate event bits
+/**
+ * @brief Connecting to network and set appropriate event bits
+ * @param wifi_ssid WiFi SSID
+ * @param wifi_password WiFi password
  * @return ESP_OK or ESP_FAIL
  */
 esp_err_t network_connect(char* wifi_ssid, char* wifi_password)
@@ -214,10 +220,10 @@ esp_err_t network_connect(char* wifi_ssid, char* wifi_password)
     return ESP_FAIL;
 }
 
-/*
- * Disconnect from network
- * Implement this function as needed
+/**
+ * @brief Disconnect from network
  * @return ESP_OK or ESP_FAIL
+ * @note Implement this function as needed
  */
 // esp_err_t network_disconnect(void)
 // {
@@ -228,10 +234,10 @@ esp_err_t network_connect(char* wifi_ssid, char* wifi_password)
 //     return esp_wifi_disconnect();
 // }
 
-/*
- * Restore network settings to default
- * Implement this function as needed
+/**
+ * @brief Restore network settings to default
  * @return ESP_OK
+ * @note Implement this function as needed
  */
 // esp_err_t network_deinit(void)
 // {
@@ -251,6 +257,10 @@ esp_err_t network_connect(char* wifi_ssid, char* wifi_password)
 //     return ESP_OK;
 // }
 
+/**
+ * @brief Network task to run
+ * @param pvParameters 
+ */
 void network_task(void *pvParameters)
 {
     ESP_LOGI(TAG, "Network connecting...");
@@ -260,6 +270,7 @@ void network_task(void *pvParameters)
     if(ret != ESP_OK) 
 	{
         ESP_LOGE(TAG, "Failed to connect to Wi-Fi network");
+        my_error_handler(TAG);
     }
 
     wifi_ap_record_t ap_info;
@@ -267,11 +278,13 @@ void network_task(void *pvParameters)
     if (ret == ESP_ERR_WIFI_CONN) 
 	{
         ESP_LOGE(TAG, "Wi-Fi station interface not initialized");
+        my_error_handler(TAG);
     }
 
     else if (ret == ESP_ERR_WIFI_NOT_CONNECT) 
 	{
         ESP_LOGE(TAG, "Wi-Fi station is not connected");
+        my_error_handler(TAG);
     } 
 
 	else 
@@ -282,7 +295,7 @@ void network_task(void *pvParameters)
         ESP_LOGI(TAG, "Primary Channel: %d", ap_info.primary);
         ESP_LOGI(TAG, "RSSI: %d", ap_info.rssi);
 
-        vTaskDelay(pdMS_TO_TICKS(5000));
+        vTaskDelay(pdMS_TO_TICKS(3000));
     }
 
 	while(1)
@@ -316,5 +329,10 @@ void network_connection_call_callback(void)
 
 void network_start(void)
 {
-	xTaskCreatePinnedToCore(&network_task, "Network_task", NETWORK_TASK_STACK_SIZE, NULL, NETWORK_TASK_PRIORITY, NULL, NETWORK_TASK_CORE_ID);
+	BaseType_t err = xTaskCreatePinnedToCore(&network_task, "Network_task", NETWORK_TASK_STACK_SIZE, NULL, NETWORK_TASK_PRIORITY, NULL, NETWORK_TASK_CORE_ID);
+    if (err != pdPASS)
+    {
+        ESP_LOGE(TAG, "Network task creation failed");
+        my_error_handler(TAG);
+    }
 }

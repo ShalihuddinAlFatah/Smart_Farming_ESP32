@@ -1,3 +1,8 @@
+/**
+ * Smart Farming ESP-IDF
+ * Author: Shalihuddin Al Fatah
+ */
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_log.h"
@@ -7,9 +12,11 @@
 #include "network_connection.h"
 #include "My_MQTT_task.h"
 
-
 static const char TAG[] = "main";
 
+/**
+ * @brief Network connected event callback function
+ */
 void network_connected_events(void)
 {
 	ESP_LOGI(TAG, "Network Connected!!");
@@ -36,6 +43,4 @@ void app_main(void)
 
     // Set connected event callback
 	network_connection_set_callback(&network_connected_events);
-
-    // xTaskCreate(sleep_task, "sleep_task", 2048, NULL, 2, NULL);
 }

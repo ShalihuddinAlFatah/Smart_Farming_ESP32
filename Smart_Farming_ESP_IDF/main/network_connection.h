@@ -8,6 +8,8 @@
 
 #include "freertos/FreeRTOS.h"
 
+#include "error_handler.h"
+
 // Callback typedef
 typedef void (*network_connected_event_callback_t)(void);
 
@@ -17,8 +19,8 @@ typedef void (*network_connected_event_callback_t)(void);
 #define NETWORK_TASK_CORE_ID	0
 
 // Enter the Wi-Fi credentials here
-#define WIFI_SSID 				"My_WiFi_SSID"
-#define WIFI_PASSWORD 			"My_WiFi_Password"
+#define WIFI_SSID 				"Your_WiFi_SSID"
+#define WIFI_PASSWORD 			"Your_WiFi_Password"
 #define WIFI_AUTHMODE 			WIFI_AUTH_WPA2_PSK
 
 // esp_err_t network_init(void);
@@ -30,17 +32,18 @@ typedef void (*network_connected_event_callback_t)(void);
 // esp_err_t network_deinit(void);
 
 /**
- * Sets the callback function.
+ * @brief Sets the callback function
+ * @param cb Address of callback function
  */
 void network_connection_set_callback(network_connected_event_callback_t cb);
 
 /**
- * Calls the callback function.
+ * @brief Calls the callback function.
  */
 void network_connection_call_callback(void);
 
-/* 
- * Start of network connection task
+/** 
+ * @brief Start of network connection task
  */
 void network_start(void);
 
