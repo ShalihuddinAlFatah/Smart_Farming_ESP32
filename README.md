@@ -11,7 +11,7 @@ I added new capacitive soil moisture sensor. It uses ADS111x to connect the sens
 
 This project tested using ESP-IDF 5.5.1 in Visual Studio Code. Development board used ESP32 DevKitC and ESP32-S3 DevKitC.
 
-## Files explanation:
+## Files explanation
 Device driver and low level code thing:
 1. ADS111x.h .c -> ADC111x library
 2. DHT22.h .c -> DHT22 library
@@ -26,5 +26,6 @@ Application layer:
 2. error_handler.h .c -> handling error
 3. My_MQTT_task.h .c -> collecting sensor data and send them to MQTT broker
 
-DHT22 library -> https://github.com/Andrey-m/DHT22-lib-for-esp-idf
-ADS111x library -> https://github.com/ShalihuddinAlFatah/ADS111x_ESP-IDF_9177
+## Library used
+1. DHT22 library -> https://github.com/Andrey-m/DHT22-lib-for-esp-idf
+2. ADS111x library -> https://github.com/ShalihuddinAlFatah/ADS111x_ESP-IDF_9177
