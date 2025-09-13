@@ -8,120 +8,6 @@
         "env": []
     },
     {
-        "id": "bfdb12bd0c03ac87",
-        "type": "mqtt in",
-        "z": "a6a4932ebdb71e34",
-        "name": "ESPValues",
-        "topic": "ESPValues",
-        "qos": "0",
-        "datatype": "auto-detect",
-        "broker": "9ccee11644db4956",
-        "nl": false,
-        "rap": true,
-        "rh": 0,
-        "inputs": 0,
-        "x": 240,
-        "y": 100,
-        "wires": [
-            [
-                "5148e2c72c08b7aa"
-            ]
-        ]
-    },
-    {
-        "id": "5148e2c72c08b7aa",
-        "type": "debug",
-        "z": "a6a4932ebdb71e34",
-        "name": "debug 2",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 660,
-        "y": 100,
-        "wires": []
-    },
-    {
-        "id": "a6684615f87ef50a",
-        "type": "mqtt out",
-        "z": "a6a4932ebdb71e34",
-        "name": "ledState",
-        "topic": "ledState",
-        "qos": "0",
-        "retain": "false",
-        "respTopic": "",
-        "contentType": "",
-        "userProps": "",
-        "correl": "",
-        "expiry": "",
-        "broker": "9ccee11644db4956",
-        "x": 660,
-        "y": 180,
-        "wires": []
-    },
-    {
-        "id": "901bf75a17dcc6ec",
-        "type": "inject",
-        "z": "a6a4932ebdb71e34",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "on",
-        "payloadType": "str",
-        "x": 250,
-        "y": 180,
-        "wires": [
-            [
-                "a6684615f87ef50a"
-            ]
-        ]
-    },
-    {
-        "id": "7ebb8d5118d028a1",
-        "type": "inject",
-        "z": "a6a4932ebdb71e34",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "off",
-        "payloadType": "str",
-        "x": 250,
-        "y": 240,
-        "wires": [
-            [
-                "a6684615f87ef50a"
-            ]
-        ]
-    },
-    {
         "id": "c34fa71f9872c17b",
         "type": "mqtt in",
         "z": "a6a4932ebdb71e34",
@@ -181,7 +67,7 @@
         "type": "function",
         "z": "a6a4932ebdb71e34",
         "name": "function 1",
-        "func": "let temperature = msg.payload.temperature;\nlet humidity = msg.payload.humidity;\nlet timestmp = Math.floor(new Date().getTime()/1000);\n\nmsg.query = \"INSERT INTO smart_farming (time, temperature, humidity) VALUES (\"+timestmp+\", \"+temperature+\", \"+humidity+\");\";\nmsg.payload = [timestmp, temperature, humidity];\n\nreturn msg;",
+        "func": "let temperature = msg.payload.temperature;\nlet humidity = msg.payload.humidity;\nlet soil_moisture = msg.payload.soil_moisture;\nlet timestmp = Math.floor(new Date().getTime()/1000);\n\nmsg.query = \"INSERT INTO smart_farming (time, temperature, humidity, soil_moisture) VALUES (\"+timestmp+\", \"+temperature+\", \"+humidity+\", \"+soil_moisture+\");\";\nmsg.payload = [timestmp, temperature, humidity, soil_moisture];\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -268,7 +154,7 @@
         "hostFieldType": "str",
         "port": 5432,
         "portFieldType": "num",
-        "database": "udemy_course",
+        "database": "Your_Database_Name",
         "databaseFieldType": "str",
         "ssl": "false",
         "sslFieldType": "bool",
@@ -280,9 +166,9 @@
         "idleFieldType": "num",
         "connectionTimeout": 10000,
         "connectionTimeoutFieldType": "num",
-        "user": "My_PostgreSQL_Username",
+        "user": "Your_PostgreSQL_Username",
         "userFieldType": "str",
-        "password": "My_PostgreSQL_Password",
+        "password": "Your_PostgreSQL_Password",
         "passwordFieldType": "str"
     }
 ]
