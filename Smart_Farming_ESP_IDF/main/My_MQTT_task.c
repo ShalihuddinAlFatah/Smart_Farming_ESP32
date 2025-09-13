@@ -11,16 +11,15 @@
 #include "esp_random.h"
 #include "esp_wifi.h"
 #include "mqtt_client.h"
-#include "esp_sleep.h"
+#include "esp_sleep.h"    // Include library to enable deep sleep 
 #include "driver/gpio.h"
 #include "driver/rtc_io.h"
 
 #include "My_MQTT_task.h"
 #include "sensor_interface_task.h"
+#include "error_handler.h"
 
 static const char TAG[] = "MQTT";
-
-static bool mqtt_started = false;
 
 // MQTT client handle
 esp_mqtt_client_handle_t client = NULL;
@@ -28,6 +27,11 @@ esp_mqtt_client_handle_t client = NULL;
 // Queue handle used to manipulate the main queue of events
 static QueueHandle_t mqtt_task_queue_handle;
 
+/**
+ * @brief Send message to the MQTT task message queue
+ * @param msgID MQTT task message enum
+ * @return pdTRUE if success, otherwise errQUEUE_FULL
+ */
 static BaseType_t My_MQTT_task_send_message(mqtt_task_message_e msgID)
 {
     mqtt_task_queue_message_t msg;
@@ -40,6 +44,12 @@ static BaseType_t My_MQTT_task_send_message(mqtt_task_message_e msgID)
     return ret;
 }
 
+/**
+ * @brief Print error message of the MQTT_EVENT_ERROR
+ * @param message Error message
+ * @param error_code Error code
+ * @note Helper function for mqtt_event_handler
+ */
 static void log_error_if_nonzero(const char *message, int error_code)
 {
     if (error_code != 0) {
@@ -47,15 +57,12 @@ static void log_error_if_nonzero(const char *message, int error_code)
     }
 }
 
-/*
- * @brief Event handler registered to receive MQTT events
- *
- *  This function is called by the MQTT client event loop.
- *
- * @param handler_args user data registered to the event.
- * @param base Event base for the handler(always MQTT Base in this example).
- * @param event_id The id for the received event.
- * @param event_data The data for the event, esp_mqtt_event_handle_t.
+/**
+ * @brief Event handler registered to receive MQTT events. This function is called by the MQTT client event loop
+ * @param handler_args user data registered to the event
+ * @param base Event base for the handler (always MQTT Base in this example)
+ * @param event_id The id for the received event
+ * @param event_data The data for the event, esp_mqtt_event_handle_t
  */
 static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data)
 {
@@ -115,6 +122,9 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
     }
 }
 
+/**
+ * @brief Format sensor data to JSON then publish them
+ */
 static void publish_sensor_data(void)
 {
     char topic[] = MY_MQTT_TOPIC;
@@ -123,6 +133,7 @@ static void publish_sensor_data(void)
     cJSON *json_data = cJSON_CreateObject();
     cJSON_AddNumberToObject(json_data, "temperature", get_temperature());
     cJSON_AddNumberToObject(json_data, "humidity", get_humidity());
+    cJSON_AddNumberToObject(json_data, "soil_moisture", get_soil_moisture());
 
     // Convert JSON object to string
     char *json_string = cJSON_PrintUnformatted(json_data);
@@ -141,6 +152,9 @@ static void publish_sensor_data(void)
     cJSON_Delete(json_data);
 }
 
+/**
+ * @brief Configure ESP deep sleep then start the deep sleep
+ */
 static void go_to_deep_sleep(void)
 {
     const int wakeup_time_sec = 60;
@@ -153,6 +167,10 @@ static void go_to_deep_sleep(void)
     esp_deep_sleep_start();
 }
 
+/**
+ * @brief MQTT task to run
+ * @param pvParameters 
+ */
 void My_MQTT_task(void *pvParameters)
 {
     mqtt_task_queue_message_t msg;
@@ -189,6 +207,7 @@ void My_MQTT_task(void *pvParameters)
                 case MY_MQTT_TASK_DISCONNECTED:
                 case MY_MQTT_TASK_ERROR:
                     // Wait 5 seconds before reconnecting
+                    // Just put ESP to sleep maybe
                     vTaskDelay(pdMS_TO_TICKS(5000));  
                     esp_mqtt_client_reconnect(client);
                     break;
@@ -201,6 +220,12 @@ void My_MQTT_task(void *pvParameters)
     }
 }
 
+static bool mqtt_started = false;
+
+/**
+ * @brief Start an MQTT task
+ * @note There should be only one instance of this task
+ */
 void My_MQTT_task_start(void)
 {
     if (mqtt_started) {
@@ -210,10 +235,16 @@ void My_MQTT_task_start(void)
     mqtt_started = true;
 
     mqtt_task_queue_handle = xQueueCreate(5, sizeof(mqtt_task_queue_message_t));
-    if (mqtt_task_queue_handle == NULL) {
+    if (mqtt_task_queue_handle == NULL) 
+    {
         ESP_LOGE(TAG, "Failed to create MQTT task queue");
         return;
     }
 
-    xTaskCreate(&My_MQTT_task, "My_MQTT_task", MY_MQTT_TASK_STACK_SIZE, NULL, MY_MQTT_TASK_PRIORITY, NULL);
+    BaseType_t err = xTaskCreate(&My_MQTT_task, "My_MQTT_task", MY_MQTT_TASK_STACK_SIZE, NULL, MY_MQTT_TASK_PRIORITY, NULL);
+    if (err != pdPASS)
+    {
+        ESP_LOGE(TAG, "MQTT task create failed");
+        my_error_handler(TAG);
+    }
 }
